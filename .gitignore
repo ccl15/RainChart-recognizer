@@ -1,0 +1,13 @@
+logs/
+saved_models/
+message.txt
+confusion.txt
+
+.ipynb_checkpoints
+__pycache__
+
+*.npy
+*.npz
+*.jpg
+*.png
+*.h5
