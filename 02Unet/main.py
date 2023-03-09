@@ -1,4 +1,5 @@
 import argparse, os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 from modules.experiment_helper import parse_exp_settings, get_model_save_path
 from modules.training_helper import set_up_tensorflow, get_summary_writer, \
     get_tf_datasets, create_model_by_exp_settings
@@ -7,10 +8,7 @@ from modules.model_trainer import train_model
 
 def main(exp_path, GPU_limit, omit_completed):
     # environment setting
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
     set_up_tensorflow(GPU_limit)
-
-
 
     # parse yaml to get experiment settings 
     exp_list = parse_exp_settings(exp_path)

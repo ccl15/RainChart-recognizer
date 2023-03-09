@@ -1,0 +1,34 @@
+experiment_name: Unet_1_color
+
+template:
+  sub_exp_name: MSE01_1em3
+  model: Unet_1
+  data:
+    data_file: ../01data_process/split_color_640_80.h5
+    batch_size: 10
+    shuffle_buffer: 5000
+  train_setting:
+    evaluate_freq: 5
+    max_epoch: 150
+    loss_name: MSE
+    L_rate: 1e-3
+    overfit_stop: 50
+
+
+sub_experiments:
+- sub_exp_name: MSE01_1em4
+  train_setting:
+    L_rate: 1e-4
+
+- sub_exp_name: MSE01_2em3
+  train_setting:
+    L_rate: 2e-3
+
+
+- sub_exp_name: BCE01_1em5
+  train_setting:
+    loss_name: BC
+    L_rate: 1e-5
+
+
+

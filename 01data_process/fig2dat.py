@@ -25,7 +25,7 @@ def CenterCrop_and_Split(image, dx=80):
 
 
     
-def pair_and_processed_to_dataset(label_folder, output_name):
+def pair_and_processed_to_dataset(label_folder, output_name=''):
     img_folder = '/NAS-DS1515P/users1/RAINFALL_STRIP_CHARTS'
     img_label_names = sorted(glob(f'{img_folder}/Train_Label/{label_folder}/RAIN-*'))
     
@@ -39,19 +39,20 @@ def pair_and_processed_to_dataset(label_folder, output_name):
         name_inp = f'{img_folder}/DATA/RAIN-{station}/RAIN-{station}-{date[:4]}/RAIN-{station}-{date}.jpg'
         
         img_lab = read_label(name_lab)
-        img_inp = cv2.imread(name_inp, cv2.IMREAD_GRAYSCALE)/255
+        img_inp = cv2.imread(name_inp)/255
         
-        if not img_lab.shape == img_inp.shape:
+        if not img_lab.shape == img_inp.shape[:2]:
             print(station, date, 'Error')
             continue
         
         pooled_lab = block_reduce(img_lab, block_size=(bs,bs), func=np.min)
-        pooled_inp = block_reduce(img_inp, block_size=(bs,bs), func=np.mean)
+        pooled_inp = block_reduce(img_inp, block_size=(bs,bs,1), func=np.mean)
 
         pool_pair_img = np.dstack((pooled_inp, pooled_lab))
         Dataset[f'{station}-{date}'] = CenterCrop_and_Split( pool_pair_img, dx=80 )  #(n,640,80,2)
-    np.save(f'{output_name}.npy', Dataset)
-    # return Dataset
+    if output_name:
+        np.save(f'{output_name}.npy', Dataset)
+    return Dataset
                 
 
  
@@ -67,8 +68,8 @@ def stack_set(D, set_keys):
     return result, Info_list
 
     
-def split_dataset(db_name):
-    D = np.load(f'{db_name}.npy', allow_pickle='TRUE').item()
+def split_dataset(D, db_name):
+    # D = np.load(f'{db_name}.npy', allow_pickle='TRUE').item()
 
     keys = list(D.keys())
     overlat = ['467770-19880813', '467770-19880812']
@@ -77,29 +78,23 @@ def split_dataset(db_name):
     
     n = len(keys)
     n_train = int(0.8 * n)
-    n_valid = n - n_train
-    # n_test = n - n_train - n_valid
     random.shuffle(keys)
     train_keys = keys[:n_train]
-    valid_keys = keys[n_train:n_train+n_valid]
-    # test_keys = keys[n_train+n_valid:]
+    valid_keys = keys[n_train:]
     train, train_info = stack_set(D, train_keys)
     valid, valid_info = stack_set(D, valid_keys)
-    # test,  test_info  = stack_set(D, test_keys)
     
     # save to h5
     with h5py.File(f'{db_name}.h5', 'w') as f:
         f.create_dataset('train', data=train)
         f.create_dataset('valid', data=valid)
-        # f.create_dataset('test', data=test)
         f.create_dataset('train_info', data=train_info)
         f.create_dataset('valid_info', data=valid_info)
-        # f.create_dataset('test_info', data=test_info)
         
 
 
 #%%
 if __name__ == '__main__':
-    pair_and_processed_to_dataset('uuchen/test', 'test')
-    # split_dataset(Dataset)
+    dataset = pair_and_processed_to_dataset('uuchen/test', 'test_color')
+    # split_dataset(dataset, 'test_color')
 

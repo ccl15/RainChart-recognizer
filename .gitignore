@@ -1,7 +1,6 @@
 logs/
 saved_models/
-message.txt
-confusion.txt
+*.txt
 
 .ipynb_checkpoints
 __pycache__

@@ -35,8 +35,8 @@ def get_tf_datasets(data_file, batch_size, shuffle_buffer):
         with h5py.File(data_file, 'r') as f:
             data = f[phase][:]
             print(phase, 'data shape', data.shape)
-            input_data = tf.data.Dataset.from_tensor_slices(data[...,:1].astype('float32'))
-            label_data = tf.data.Dataset.from_tensor_slices(data[...,1:].astype('float32'))
+            input_data = tf.data.Dataset.from_tensor_slices(data[...,:3].astype('float32'))
+            label_data = tf.data.Dataset.from_tensor_slices(data[...,3:].astype('float32'))
     
             datasets[phase] = tf.data.Dataset.zip((input_data, label_data)) \
                     .shuffle(shuffle_buffer) \

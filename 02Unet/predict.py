@@ -11,7 +11,7 @@ from pathlib import Path
 def main(exp_path, only_this_sub):
     exp_list = parse_exp_settings(exp_path, only_this_sub)
     # load test data
-    data_file = '/home/ccl/rain_chart/01data_process/wide_test.npy'
+    data_file = '/home/ccl/rain_chart/01data_process/test_color.npy'
     test_data = np.load(data_file, allow_pickle='TRUE').item()
     
     for sub_exp_settings in exp_list:
@@ -25,11 +25,11 @@ def main(exp_path, only_this_sub):
         # set output 
         pred_set = dict()
         for key in list(test_data.keys()):
-            pred_set[key] = model.predict(test_data[key][...,:1])
+            pred_set[key] = model(test_data[key][...,:3])
             
-        save_folder = f'/home/ccl/rain_chart/03output/{exp_name}/{sub_exp_name}'
+        save_folder = f'/home/ccl/rain_chart/03output/{exp_name}/'
         Path(save_folder).mkdir(parents=True, exist_ok=True)
-        np.save(f'{save_folder}/pred.npy', pred_set)
+        np.save(f'{save_folder}/{sub_exp_name}.npy', pred_set)
         print('Save predict file:', exp_name, sub_exp_name)
 
 
@@ -37,7 +37,7 @@ def main(exp_path, only_this_sub):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('exp_path')
-    parser.add_argument('--only_this_sub', default='')
+    parser.add_argument('-sub','--only_this_sub', default='')
     args = parser.parse_args()
 
     main(args.exp_path, args.only_this_sub)
