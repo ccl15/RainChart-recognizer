@@ -25,7 +25,7 @@ def main(exp_path, only_this_sub):
         # set output 
         pred_set = dict()
         for key in list(test_data.keys()):
-            pred_set[key] = model(test_data[key][...,:3])
+            pred_set[key] = np.squeeze(model.predict(test_data[key][...,:3]))
             
         save_folder = f'/home/ccl/rain_chart/03output/{exp_name}/'
         Path(save_folder).mkdir(parents=True, exist_ok=True)

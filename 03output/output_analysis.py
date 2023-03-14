@@ -15,8 +15,8 @@ class DataLoader:
         if label:
             result = np.concatenate([D[key][...,-1] for key in self.test_list])
         else:
-            result = np.concatenate([D[key][...,0] for key in self.test_list])
-        print(result.shape, label)
+            result = np.concatenate([D[key] for key in self.test_list])
+        print(result.shape)
         return np.squeeze(result)
     
 
@@ -55,9 +55,9 @@ def confusion_matrix(yt, yp, output_file, th_list):
 
 # input setting
 # exp_name = input('exp_name/sub_exp_name:')
-exp_name ='Unet_1_color'
-sub_exp_names = ['BCE01_1em5', 'MSE01_1em3']
-th_list = np.arange(0.3, 1, 0.1)
+exp_name ='Unet_2_color'
+sub_exp_names = ['MSE_1em3', 'MSE_2em3']
+th_list = np.arange(0.4, 0.7, 0.1)
 
 
 
@@ -70,7 +70,7 @@ for sub_exp in sub_exp_names:
     exp_file = f'/home/ccl/rain_chart/03output/{exp_name}/{sub_exp}.npy'
     test_pred = data_loader(exp_file, False)
 
-    txt_file = f'/home/ccl/rain_chart/03output/{exp_name}/{sub_exp}/New_confusion.txt'
+    txt_file = f'/home/ccl/rain_chart/03output/{exp_name}/{sub_exp}/confusion.txt'
     confusion_matrix(test_true, test_pred, txt_file, th_list)
     
     

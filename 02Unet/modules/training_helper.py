@@ -45,6 +45,7 @@ def get_tf_datasets(data_file, batch_size, shuffle_buffer):
 
 
 def create_model_by_exp_settings(model_name, load_from=''):
+    tf.keras.backend.clear_session()
     print('Create model...')
     model_class = importlib.import_module(f'models.{model_name}').Model()
     if load_from:

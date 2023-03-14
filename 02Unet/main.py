@@ -22,14 +22,15 @@ def main(exp_path, GPU_limit, omit_completed):
         if omit_completed and os.path.isdir(log_path):
             print('Sub-experiment already done before, skipped ~~~~')
             continue
-
+        
         # log and model saved path setting
         summary_writer = get_summary_writer(log_path)
         model_save_path = get_model_save_path(exp_name, sub_exp_name)
         
         # load data and creat model. ^train_helper
-        datasets = get_tf_datasets(**sub_exp_settings['data'])
         model = create_model_by_exp_settings(sub_exp_settings['model'])
+        if 'datasets' not in locals():
+            datasets = get_tf_datasets(**sub_exp_settings['data'])
        
         # training. ^model_trainer
         train_model(
