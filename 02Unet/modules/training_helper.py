@@ -31,8 +31,8 @@ def get_summary_writer(log_path):
 def get_tf_datasets(data_file, batch_size, shuffle_buffer):
     datasets = dict()
     print('Loading data...')
-    for phase in ['train', 'valid']:
-        with h5py.File(data_file, 'r') as f:
+    with h5py.File(data_file, 'r') as f:
+        for phase in ['train', 'valid']:
             data = f[phase][:]
             print(phase, 'data shape', data.shape)
             input_data = tf.data.Dataset.from_tensor_slices(data[...,:3].astype('float32'))

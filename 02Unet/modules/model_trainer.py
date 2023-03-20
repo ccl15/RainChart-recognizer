@@ -1,6 +1,7 @@
 import tensorflow as tf
 from collections import defaultdict
 from modules.training_helper import evaluate_loss
+import os, glob
 
 def train_model(
     model,
@@ -35,8 +36,8 @@ def train_model(
         return
     
 
-    best_loss = 9e10
-    best_epoch = 0
+    best_losses = [9e10, 9e10, 9e10]
+    best_epochs = [0, 0, 0]
     for epoch_index in range(1, max_epoch+1):
         # ---- train
         print('Executing epoch #%d' % (epoch_index))
@@ -50,7 +51,7 @@ def train_model(
 
         # ---- evaluate
         if (epoch_index) % evaluate_freq == 0:
-            print('Completed %d epochs, do some evaluation' % (epoch_index))
+            print(f'Completed training epoch. Evaluate epochs {epoch_index}')
             
             for phase in ['train', 'valid']:
                 loss  = evaluate_loss(model, datasets[phase], loss_function)
@@ -58,13 +59,19 @@ def train_model(
                     tf.summary.scalar(f'[{phase}]: {loss_name}', loss, step=epoch_index) 
             
             valid_loss = loss
-            if best_loss >= valid_loss:
-                best_loss = valid_loss
-                best_epoch = epoch_index
-                print('Get best loss so far at epoch %d! Saving the model.' % (epoch_index))
-                model.save_weights(f'{saving_path}/Unet', save_format='tf')
-            elif overfit_stop and (epoch_index - best_epoch) >= overfit_stop:
+            if valid_loss < max(best_losses):
+                replaced_idx = best_losses.index(max(best_losses))
+                old_epoch = best_epochs[replaced_idx]
+                best_losses[replaced_idx] = valid_loss
+                best_epochs[replaced_idx] = epoch_index
+                print(f'Get best three loss. Save epoch {epoch_index}.')
+                model.save_weights(f'{saving_path}/M{epoch_index:03d}', save_format='tf')
+                
+                if old_epoch > 0:
+                    fs = glob.glob(f'{saving_path}/M{old_epoch:03d}*')
+                    for f in fs:
+                        print(f'Remove {f}')
+                        os.remove(f)
+            elif overfit_stop and (epoch_index - max(best_epochs)) >= overfit_stop:
                 print('overfiting early stop!')
                 break
-                
-
