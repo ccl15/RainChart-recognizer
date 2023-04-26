@@ -40,7 +40,7 @@ def train_model(
     best_epochs = [0, 0, 0]
     for epoch_index in range(1, max_epoch+1):
         # ---- train
-        print('Executing epoch #%d' % (epoch_index))
+        print('Epoch #%d' % (epoch_index))
         for image, label in datasets['train']:
             train_step(image, label, training=True)
 
@@ -51,7 +51,7 @@ def train_model(
 
         # ---- evaluate
         if (epoch_index) % evaluate_freq == 0:
-            print(f'Completed training epoch. Evaluate epochs {epoch_index}')
+            print(f'Evaluate epochs {epoch_index}')
             
             for phase in ['train', 'valid']:
                 loss  = evaluate_loss(model, datasets[phase], loss_function)
@@ -69,8 +69,8 @@ def train_model(
                 
                 if old_epoch > 0:
                     fs = glob.glob(f'{saving_path}/M{old_epoch:03d}*')
+                    print(f'Remove {old_epoch}')
                     for f in fs:
-                        print(f'Remove {f}')
                         os.remove(f)
             elif overfit_stop and (epoch_index - max(best_epochs)) >= overfit_stop:
                 print('overfiting early stop!')

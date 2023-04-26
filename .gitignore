@@ -1,7 +1,9 @@
 logs/
 saved_models/
 *.txt
+04run_pred/models
 
+.vscode
 .ipynb_checkpoints
 __pycache__
 
