@@ -2,7 +2,7 @@ import argparse, os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 from modules.experiment_helper import parse_exp_settings, get_model_save_path
 from modules.training_helper import set_up_tensorflow, get_summary_writer, \
-    get_tf_datasets, create_model_by_exp_settings
+    get_TFRecord_dataset, create_model_by_exp_settings
 from modules.model_trainer import train_model
 
 
@@ -23,14 +23,16 @@ def main(exp_path, GPU_limit, omit_completed):
             print('Sub-experiment already done before, skipped ~~~~')
             continue
         
+        # reset tensorflow 
+
         # log and model saved path setting
         summary_writer = get_summary_writer(log_path)
         model_save_path = get_model_save_path(exp_name, sub_exp_name)
         
         # load data and creat model. ^train_helper
         model = create_model_by_exp_settings(sub_exp_settings['model'])
-        if 'datasets' not in locals():
-            datasets = get_tf_datasets(**sub_exp_settings['data'])
+        #if 'datasets' not in locals():
+        datasets = get_TFRecord_dataset(**sub_exp_settings['data'])
        
         # training. ^model_trainer
         train_model(

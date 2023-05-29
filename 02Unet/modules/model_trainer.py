@@ -8,6 +8,7 @@ def train_model(
     datasets,
     summary_writer,
     saving_path,
+    batch_size,
     evaluate_freq,
     max_epoch,
     loss_name,
@@ -41,7 +42,7 @@ def train_model(
     for epoch_index in range(1, max_epoch+1):
         # ---- train
         print('Epoch #%d' % (epoch_index))
-        for image, label in datasets['train']:
+        for image, label in datasets['train'].batch(batch_size):
             train_step(image, label, training=True)
 
         for loss_name, avg_loss in avg_losses.items():
@@ -54,10 +55,10 @@ def train_model(
             print(f'Evaluate epochs {epoch_index}')
             
             for phase in ['train', 'valid']:
-                loss  = evaluate_loss(model, datasets[phase], loss_function)
+                loss  = evaluate_loss(model, datasets[phase].batch(batch_size), loss_function)
                 with summary_writer.as_default():
                     tf.summary.scalar(f'[{phase}]: {loss_name}', loss, step=epoch_index) 
-            
+             
             valid_loss = loss
             if valid_loss < max(best_losses):
                 replaced_idx = best_losses.index(max(best_losses))
@@ -75,3 +76,4 @@ def train_model(
             elif overfit_stop and (epoch_index - max(best_epochs)) >= overfit_stop:
                 print('overfiting early stop!')
                 break
+            

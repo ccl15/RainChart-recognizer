@@ -37,12 +37,19 @@ def pair_and_processed_to_dataset(label_folder, output_name=''):
         station = string[:6]
         date = string[7:15]
         name_inp = f'{img_folder}/DATA/RAIN-{station}/RAIN-{station}-{date[:4]}/RAIN-{station}-{date}.jpg'
-        
-        img_lab = read_label(name_lab)
-        img_inp = cv2.imread(name_inp)/255
-        
+
+        try: 
+            img_lab = read_label(name_lab)
+        except:
+            print(name_lab, 'label load error')
+            continue
+        try:
+            img_inp = cv2.imread(name_inp)/255
+        except:
+            print(name_inp, 'no file')
+            continue
         if not img_lab.shape == img_inp.shape[:2]:
-            print(station, date, 'Error')
+            print(station, date, 'shape error')
             continue
         
         pooled_lab = block_reduce(img_lab, block_size=(bs,bs), func=np.min)
@@ -67,7 +74,7 @@ def stack_set(D, set_keys):
     print(len(Info_list), result.shape)
     return result, Info_list
 
-    
+
 def split_dataset(D, db_name):
     # D = np.load(f'{db_name}.npy', allow_pickle='TRUE').item()
 
@@ -91,10 +98,31 @@ def split_dataset(D, db_name):
         f.create_dataset('train_info', data=train_info)
         f.create_dataset('valid_info', data=valid_info)
         
+#%%
+import tensorflow as tf
+
+# write 4D data to TFRecor file
+def create_TFRecord_file(npfile, tfname):
+    data = np.load(f'{npfile}.npy', allow_pickle='TRUE').item()
+   
+    def _bytes_feature(value):
+        return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+
+    with tf.io.TFRecordWriter(tfname) as writer:    
+        for img in tqdm(data.values()):
+            for i in range(len(img)):
+                # conver img_slice from float64 to float32
+                img_slice = img[i].astype(np.float32)
+                feature = {
+                    'image' : _bytes_feature( img_slice[...,:-1].tobytes() ),
+                    'label' : _bytes_feature( img_slice[...,-1].tobytes() )
+                }
+                example = tf.train.Example(features=tf.train.Features(feature=feature))
+                writer.write(example.SerializeToString())
 
 
 #%%
 if __name__ == '__main__':
-    dataset = pair_and_processed_to_dataset('uuchen/test', 'test_color')
-    # split_dataset(dataset, 'test_color')
-
+    #dataset = pair_and_processed_to_dataset('tsung/v2', 'mm05')
+    #split_dataset(dataset, 'split_color_v2')
+    create_TFRecord_file('data/mm05', 'color_f32.tfr')
