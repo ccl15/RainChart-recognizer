@@ -1,4 +1,4 @@
-import os, importlib, cv2
+port os, importlib, cv2
 from pathlib import Path
 from skimage.measure import block_reduce
 import numpy as np
@@ -20,6 +20,7 @@ def input_data_processing(img_path, color):
         image = cv2.imread(img_path.as_posix())/255
     else:
         image = cv2.imread(img_path.as_posix(), cv2.IMREAD_GRAYSCALE)/255
+        image = image[...,np.newaxis]
     image = block_reduce(image, block_size=(2,2,1), func=np.mean)
     image = CenterCrop_and_Split(image)
     return image
@@ -30,9 +31,9 @@ if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"] = ''
     
     # model setting and load model
-    color = True # modify to False if gray scale !!!
+    color = False # modify to False if gray scale !!!
     model_name = 'models.Unet_1'
-    saved_weight = 'models/M030' if color else 'models/...'
+    saved_weight = 'models/M030' if color else 'models/G040'
     model = importlib.import_module(model_name).Model()
     model.load_weights(saved_weight).expect_partial()
     
@@ -51,4 +52,4 @@ if __name__ == '__main__':
         whole_pred = np.hstack(pred)
         out_path = Output_dir / (img_path.stem + '.npy')
         np.save(out_path, whole_pred)
-    
+        break

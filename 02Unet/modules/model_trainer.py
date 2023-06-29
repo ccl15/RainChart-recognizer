@@ -8,7 +8,6 @@ def train_model(
     datasets,
     summary_writer,
     saving_path,
-    batch_size,
     evaluate_freq,
     max_epoch,
     loss_name,
@@ -36,13 +35,14 @@ def train_model(
         avg_losses[f'{loss_name}'].update_state(pred_loss)
         return
     
-
-    best_losses = [9e10, 9e10, 9e10]
-    best_epochs = [0, 0, 0]
+    best_loss = 9e10
+    #best_losses = [9e10, 9e10]
+    #best_epochs = [0, 0]
+    #start_save = 10
     for epoch_index in range(1, max_epoch+1):
         # ---- train
         print('Epoch #%d' % (epoch_index))
-        for image, label in datasets['train'].batch(batch_size):
+        for image, label in datasets['train']:
             train_step(image, label, training=True)
 
         for loss_name, avg_loss in avg_losses.items():
@@ -51,29 +51,37 @@ def train_model(
             avg_loss.reset_states()
 
         # ---- evaluate
-        if (epoch_index) % evaluate_freq == 0:
+        if (epoch_index % evaluate_freq) == 0:
+        #if (epoch_index >= start_save) and (epoch_index % evaluate_freq == 0):
             print(f'Evaluate epochs {epoch_index}')
             
-            for phase in ['train', 'valid']:
-                loss  = evaluate_loss(model, datasets[phase].batch(batch_size), loss_function)
+            for phase in ['valid']:
+                loss  = evaluate_loss(model, datasets[phase], loss_function)
                 with summary_writer.as_default():
                     tf.summary.scalar(f'[{phase}]: {loss_name}', loss, step=epoch_index) 
              
             valid_loss = loss
-            if valid_loss < max(best_losses):
-                replaced_idx = best_losses.index(max(best_losses))
-                old_epoch = best_epochs[replaced_idx]
-                best_losses[replaced_idx] = valid_loss
-                best_epochs[replaced_idx] = epoch_index
-                print(f'Get best three loss. Save epoch {epoch_index}.')
-                model.save_weights(f'{saving_path}/M{epoch_index:03d}', save_format='tf')
+            #if valid_loss < max(best_losses):
+            if valid_loss < best_loss:
+                #replaced_idx = best_losses.index(max(best_losses))
+                #old_epoch = best_epochs[replaced_idx]
+                #best_losses[replaced_idx] = valid_loss
+                #best_epochs[replaced_idx] = epoch_index
+                best_loss = valid_loss
+                best_epoch = epoch_index
+                print(f'Get best loss. Save epoch {epoch_index}.')
+                #model.save_weights(f'{saving_path}/M{epoch_index:03d}', save_format='tf')
+                model.save_weights(f'{saving_path}/M', save_format='tf')
                 
+                '''
                 if old_epoch > 0:
                     fs = glob.glob(f'{saving_path}/M{old_epoch:03d}*')
                     print(f'Remove {old_epoch}')
                     for f in fs:
                         os.remove(f)
-            elif overfit_stop and (epoch_index - max(best_epochs)) >= overfit_stop:
+                '''
+            #elif overfit_stop and (epoch_index - max(best_epochs)) >= overfit_stop:
+            elif overfit_stop and (epoch_index - best_epoch) >= overfit_stop:
                 print('overfiting early stop!')
                 break
             

@@ -45,7 +45,7 @@ def get_tf_datasets(data_file, batch_size, shuffle_buffer): #, train_size):
     return datasets
 
 
-def get_TFRecord_dataset(data_file, shuffle_buffer):
+def get_TFRecord_dataset(data_file, shuffle_buffer, batch_size):
     print('Loading data...')
     # load data
     def _parse_example(example_string):
@@ -69,8 +69,8 @@ def get_TFRecord_dataset(data_file, shuffle_buffer):
     count = sum(1 for _ in dataset)
     train_size = int(count*0.7)
     ds_for_model ={
-        'train' : dataset.take(train_size),
-        'valid' : dataset.skip(train_size)
+        'train' : dataset.take(train_size).batch(batch_size).prefetch(tf.data.AUTOTUNE),
+        'valid' : dataset.skip(train_size).batch(batch_size).prefetch(tf.data.AUTOTUNE)
     }
     return ds_for_model
 

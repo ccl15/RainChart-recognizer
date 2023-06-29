@@ -11,3 +11,4 @@ __pycache__
 *.jpg
 *.png
 *.h5
+*.tfr

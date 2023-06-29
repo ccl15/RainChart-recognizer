@@ -30,7 +30,8 @@ def main(exp_path, GPU_limit, omit_completed):
         model_save_path = get_model_save_path(exp_name, sub_exp_name)
         
         # load data and creat model. ^train_helper
-        model = create_model_by_exp_settings(sub_exp_settings['model'])
+        load_path = sub_exp_settings.get('load_path', '')
+        model = create_model_by_exp_settings(sub_exp_settings['model'], load_path)
         #if 'datasets' not in locals():
         datasets = get_TFRecord_dataset(**sub_exp_settings['data'])
        

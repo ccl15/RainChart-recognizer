@@ -5,13 +5,13 @@ from modules.experiment_helper import parse_exp_settings
 from modules.training_helper import create_model_by_exp_settings
 import numpy as np
 from pathlib import Path
-
+from tqdm import tqdm
 
 
 def main(exp_path, only_this_sub, weight_name):
     exp_list = parse_exp_settings(exp_path, only_this_sub)
     # load test data
-    data_file = '/home/ccl/rain_chart/01data_process/test_color.npy'  #!!!
+    data_file = '/home/ccl/rain_chart/01data_process/data/test_color.npy'  #!!!
     test_data = np.load(data_file, allow_pickle='TRUE').item()
     
     for sub_exp_settings in exp_list:
@@ -24,7 +24,7 @@ def main(exp_path, only_this_sub, weight_name):
         
         # set output 
         pred_set = dict()
-        for key in list(test_data.keys()):
+        for key in tqdm(list(test_data.keys())):
             pred_set[key] = np.squeeze(model(test_data[key][...,:-1]))  #!!!
             
         save_folder = f'/home/ccl/rain_chart/03output/{exp_name}/'

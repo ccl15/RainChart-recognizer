@@ -1,10 +1,10 @@
 import pandas as pd 
 import numpy as np
-
+from pathlib import Path
 
 class DataLoader:
     def __init__(self):
-        test_list_file = '/home/ccl/rain_chart/01data_process/test_list.txt'
+        test_list_file = '/home/ccl/rain_chart/01data_process/data/test_list.txt'
         with open(test_list_file, 'r') as f:
             self.test_list = [line[5:20] for line in f.readlines()]
 
@@ -50,27 +50,25 @@ def confusion_matrix(yt, yp, output_file, th_list):
             f.write('\n\n')
 
 
-
-
-
 # input setting
 # exp_name = input('exp_name/sub_exp_name:')
-exp_name ='Unet_2_color'
-sub_exp_names = ['MSE_1em3', 'MSE_2em3']
-th_list = np.arange(0.4, 0.7, 0.1)
+exp_name ='Unet_1_color_v2'
+sub_exp_names = ['pass2_data_mm05_M180']
+th_list = np.arange(0.4, 0.51, 0.1)
 
 
 
 # load true
 data_loader = DataLoader()
-true_file = '/home/ccl/rain_chart/01data_process/test_color.npy'
+true_file = '/home/ccl/rain_chart/01data_process/data/test_color.npy' #!!!
 test_true = data_loader(true_file, True)
 # load sub exp
 for sub_exp in sub_exp_names:
-    exp_file = f'/home/ccl/rain_chart/03output/{exp_name}/{sub_exp}.npy'
+    exp_file = f'{exp_name}/{sub_exp}.npy'
     test_pred = data_loader(exp_file, False)
 
-    txt_file = f'/home/ccl/rain_chart/03output/{exp_name}/{sub_exp}/confusion.txt'
+    save_folder = f'{exp_name}/matrix'
+    Path(save_folder).mkdir(parents=True, exist_ok=True)
+    txt_file = f'{save_folder}/{sub_exp}.txt'
+   
     confusion_matrix(test_true, test_pred, txt_file, th_list)
-    
-    
