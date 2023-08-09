@@ -1,0 +1,24 @@
+experiment_name: Unet_color_v3
+
+template:
+  sub_exp_name: U1
+  model: Unet_1
+  data:
+    data_file: ../01data_process/color_f32_m6.tfr
+    shuffle_buffer: 28000
+    batch_size: 50
+  train_setting:
+    evaluate_freq: 5
+    max_epoch: 400
+    loss_name: MSE
+    L_rate: 2e-3
+    overfit_stop: 50
+
+sub_experiments:
+- sub_exp_name: U1_pass_s
+  load_path: saved_models/Unet_color_v3/U1/M
+  train_setting:
+    max_epoch: 200
+    L_rate: 1e-5
+
+

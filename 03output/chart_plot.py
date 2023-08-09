@@ -1,60 +1,59 @@
 # output npy file to rain chart fig 
 import numpy as np
 import matplotlib.pyplot as plt
-# from tqdm import tqdm
+from tqdm import tqdm
+from pathlib import Path
+
+
+class ChartStack:
+    def __init__(self, n):
+        self.fs = 14
+        self.n = n
+        fig, axes = plt.subplots(nrows=n, ncols=1, figsize=(10, 3*n))
+        self.axes = axes
+        self.fig = fig
+
+    def plot_gray(self, j, data, left_tt='', right_tt=''):
+        ax = self.axes if self.n == 1 else self.axes[j]
+        im = ax.imshow(data, cmap='gray_r', vmin=0, vmax=1)
+        ax.set_title(left_tt,  loc='left',  fontsize = self.fs)
+        ax.set_title(right_tt, loc='right', fontsize = self.fs)
+        self.fig.colorbar(im,ax=ax, fraction=0.013)
+
+    def plot_rgb(self, j, data, left_tt='', right_tt=''):
+        ax = self.axes if self.n == 1 else self.axes[j]
+        im = ax.imshow(data)
+        ax.set_title(left_tt,  loc='left',  fontsize = self.fs)
+        ax.set_title(right_tt, loc='right', fontsize = self.fs)
+
+    def save_fig(self, save_dir, save_name):
+        plt.savefig(f'{save_dir}/{save_name}.png', dpi=200, bbox_inches='tight')
+        plt.close()
 
 
 
-# load data
-test = np.load('/home/ccl/rain_chart/01data_process/test_color.npy', allow_pickle='TRUE').item()
+#%%  load data -----------------------------  
+exp_name, sub_exp_name = 'Unet_1_color_v2', 'pass2_data_mm05_M180'
+save_dir = f'{exp_name}/{sub_exp_name}'
+Path(save_dir).mkdir(parents=True, exist_ok=True)
+
+# load label
+# test = np.load('/home/ccl/rain_chart/01data_process/test_color.npy', allow_pickle='TRUE').item()
+
+# load original test data
+#data_file = '/home/ccl/rain_chart/01data_process/data/test_color.npy'  #!!!
+#test = np.load(data_file, allow_pickle='TRUE').item()
 
 # load predict
-# exp_name = input('exp_name/sub_exp_name:')
-def load_pred(exp_name, sub_exp_name):
-    pred_file = f'/home/ccl/rain_chart/03output/{exp_name}/{sub_exp_name}.npy'
-    return np.load(pred_file, allow_pickle=True).item()
+pred = np.load(f'{exp_name}/{sub_exp_name}.npy', allow_pickle=True).item()
 
-# pred1 = load_pred('Unet_1_data_wide/BCE01_5em6')
-# pred2 = load_pred('Unet_1_data_wide/MSE01_1em3')
-
-
-#%%
-def plot_one(fig_name, whole):
-    fs = 16
-    plt.figure(figsize=(10,3))
-    plt.imshow(whole,  cmap='gray_r', vmin=0, vmax=1)
-    plt.title(fig_name, loc='left', fontsize = fs)
-    plt.title('label', loc='right', fontsize = fs)
-    plt.colorbar(fraction = 0.013)
-    plt.savefig(f'Fig_label/{fig_name}.png',dpi=200)
-    plt.close()
-
-def plt_two(whole_pred1, whole_pred2):
-    fs = 16
-    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 6))
-    
-    im = axes[0].imshow(whole_pred1, cmap='gray_r', vmin=0, vmax=1)
-    axes[0].set_title(fig_name, loc='left', fontsize = fs)
-    axes[0].set_title('BCE', loc='right', fontsize = fs)
-    fig.colorbar(im,ax=axes[0], fraction=0.013)
-
-    im = axes[1].imshow(whole_pred2, cmap='gray_r', vmin=0, vmax=1)
-    axes[1].set_title(fig_name, loc='left', fontsize = fs)
-    axes[1].set_title('MSE', loc='right', fontsize = fs)
-    fig.colorbar(im, ax=axes[1], fraction=0.013)
-    
-    plt.savefig(f'BCEvsMSE/{fig_name}.png',dpi=200)
-    plt.close()
-    
-
-# satack pieces to one fig
-figs_name = list(test.keys())
-for i in range(0,len(figs_name)):
-    fig_name = figs_name[i]
-    # whole_pred1 = np.hstack(pred1[fig_name])
-    # whole_pred2 = np.hstack(pred2[fig_name])
-    # whole_orig = np.hstack(test[fig_name][...,0])
-    whole_true = np.hstack(test[fig_name][...,-1])
-    
+#%% plot -----------------------------------------------------------
+for fig_name in tqdm(pred.keys()):
+    #whole_test = np.hstack(test[fig_name][...,:-1])
+    whole_pred = np.hstack(pred[fig_name])
     # plot  
-    plot_one(fig_name, whole_true)
+    chart = ChartStack(1)
+    #chart.plot_rgb(0, whole_test, fig_name)
+    chart.plot_gray(0, whole_pred, fig_name)
+    chart.save_fig(save_dir, fig_name)
+   
