@@ -1,9 +1,9 @@
-port os, importlib, cv2
+import os, importlib, cv2
 from pathlib import Path
 from skimage.measure import block_reduce
 import numpy as np
 
-def CenterCrop_and_Split(image, dx = 80, dy = 640):
+def CenterCrop(image, dx = 80, dy = 640):
     # crop
     total_y, total_x, dim = image.shape
     crop_x = (total_x//dx) * dx
@@ -11,9 +11,7 @@ def CenterCrop_and_Split(image, dx = 80, dy = 640):
     x0 = total_x //2 - crop_x //2
     y0 = total_y //2 - crop_y //2
     crop_img = image[y0:y0+crop_y, x0:x0+crop_x,:]
-    # split
-    split_img = np.hsplit(crop_img, total_x//dx)
-    return np.array(split_img)
+    return crop_img[np.newaxis, ...]
 
 def input_data_processing(img_path, color):
     if color:
@@ -21,8 +19,9 @@ def input_data_processing(img_path, color):
     else:
         image = cv2.imread(img_path.as_posix(), cv2.IMREAD_GRAYSCALE)/255
         image = image[...,np.newaxis]
+        
     image = block_reduce(image, block_size=(2,2,1), func=np.mean)
-    image = CenterCrop_and_Split(image)
+    image = CenterCrop(image)
     return image
     
 if __name__ == '__main__':
@@ -49,7 +48,6 @@ if __name__ == '__main__':
         image = input_data_processing(img_path, color)
         pred = np.squeeze(model.predict(image))
         
-        whole_pred = np.hstack(pred)
         out_path = Output_dir / (img_path.stem + '.npy')
-        np.save(out_path, whole_pred)
+        np.save(out_path, pred)
         break

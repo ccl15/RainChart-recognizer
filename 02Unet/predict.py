@@ -25,11 +25,16 @@ def main(exp_path, only_this_sub, weight_name):
         # set output 
         pred_set = dict()
         for key in tqdm(list(test_data.keys())):
-            pred_set[key] = np.squeeze(model(test_data[key][...,:-1]))  #!!!
+            ds = np.hstack(test_data[key])
+            pred =  np.squeeze(model(ds[np.newaxis,...,:-1]))
+            
+            pred_set[key] = [pred, ds[...,-1]] #!!!
+            
+            
             
         save_folder = f'/home/ccl/rain_chart/03output/{exp_name}/'
         Path(save_folder).mkdir(parents=True, exist_ok=True)
-        np.save(f'{save_folder}/{sub_exp_name}_{weight_name}.npy', pred_set)
+        np.save(f'{save_folder}/{sub_exp_name}_{weight_name}_whole.npy', pred_set)
         print('Save predict file:', exp_name, sub_exp_name)
 
 

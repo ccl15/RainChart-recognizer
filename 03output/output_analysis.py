@@ -11,15 +11,12 @@ class DataLoader:
         with open(test_list_file, 'r') as f:
             self.test_list = [line[5:20] for line in f.readlines()]
 
-    def __call__(self, file, label):
+    def __call__(self, file):
         D = np.load(file, allow_pickle=True).item()
         
-        if label:
-            result = np.concatenate([D[key][...,-1] for key in self.test_list])
-        else:
-            result = np.concatenate([D[key] for key in self.test_list])
-        print(file, result.shape)
-        return np.squeeze(result)
+        pred = np.hstack([D[key][0] for key in self.test_list])
+        true = np.hstack([D[key][1] for key in self.test_list])
+        return pred, true
     
 
 def confusion_matrix(yt, yp, th_list):
@@ -42,6 +39,7 @@ def confusion_matrix(yt, yp, th_list):
     
     with open(f'{save_folder}/{sub_exp}.txt', 'w') as f:
         for th in th_list:
+            print(th, 'doing')
             cm, precision, recall, f1 = cm_calculate(th)
             
             f.write(f'th: {th:.1f}\n')
@@ -64,35 +62,46 @@ def plot_roc_curve(yt, yp):
     plt.gca().set_aspect('equal', adjustable='box')
     plt.savefig(f'{save_folder}/{sub_exp}.png', bbox_inches='tight', dpi=200)
     
-def plot_PR_cureve(yt, yp):
+def plot_PR_curve(yt, yp):
     p, r, t = precision_recall_curve(yt.ravel(), yp.ravel())
-    plt.plot(r,p, lw=3)
+    plt.plot(r,p, lw=2)
+    
+    precision = []
+    recall = []
+    for th in [0.1, 0.9]:
+        yp_01 = (yp > th).astype(np.int32)
+        cm = pd.crosstab(yt.ravel(), yp_01.ravel(), rownames=['True'], colnames=['Predicted'])
+        cm = cm.sort_index(ascending=False).sort_index(axis=1, ascending=False)
+        matrix = cm.values
+        precision.append(matrix[0,0] / matrix[:,0].sum())
+        recall.append(matrix[0,0] / matrix[0,:].sum())
+    plt.plot(recall,precision, 'r.', markersize=15)
+
     plt.xlabel('Recall')
     plt.ylabel('Precision')
     plt.axis([0,1,0,1])
     plt.gca().set_aspect('equal', adjustable='box')
     plt.savefig(f'{save_folder}/PR_{sub_exp}.png', bbox_inches='tight', dpi=200)
-    
-    
+
+
 # input setting
 # exp_name = input('exp_name/sub_exp_name:')
 exp_name ='Unet_color_v3'
-sub_exp_names = ['U1_pass_M']
+sub_exp_names = ['U1_pass_M_whole']
 th_list = np.arange(0.3, 0.51, 0.1)
 
 
-# load true
 data_loader = DataLoader()
-true_file = '/home/ccl/rain_chart/01data_process/data/test_color.npy' #!!!
-test_true = data_loader(true_file, True)
+
 # load sub exp
 for sub_exp in sub_exp_names:
     exp_file = f'{exp_name}/{sub_exp}.npy'
-    test_pred = data_loader(exp_file, False)
-
+    pred, true = data_loader(exp_file)
+    
     save_folder = f'{exp_name}/matrix'
     Path(save_folder).mkdir(parents=True, exist_ok=True)
     
-    confusion_matrix(test_true, test_pred, th_list)
+    confusion_matrix(true, pred, th_list)
     #plot_roc_curve(test_true, test_pred)
-    plot_PR_cureve(test_true, test_pred)
+    #plot_PR_curve(test_true, test_pred)
+    

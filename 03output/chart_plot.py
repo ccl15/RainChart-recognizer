@@ -33,7 +33,7 @@ class ChartStack:
 
 
 #%%  load data -----------------------------  
-exp_name, sub_exp_name = 'Unet_1_color_v2', 'pass2_data_mm05_M180'
+exp_name, sub_exp_name = 'Unet_color_v3', 'U1_pass_M_whole'
 save_dir = f'{exp_name}/{sub_exp_name}'
 Path(save_dir).mkdir(parents=True, exist_ok=True)
 
@@ -50,7 +50,7 @@ pred = np.load(f'{exp_name}/{sub_exp_name}.npy', allow_pickle=True).item()
 #%% plot -----------------------------------------------------------
 for fig_name in tqdm(pred.keys()):
     #whole_test = np.hstack(test[fig_name][...,:-1])
-    whole_pred = np.hstack(pred[fig_name])
+    whole_pred = pred[fig_name][0]
     # plot  
     chart = ChartStack(1)
     #chart.plot_rgb(0, whole_test, fig_name)
