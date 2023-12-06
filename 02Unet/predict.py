@@ -34,7 +34,7 @@ def main(exp_path, only_this_sub, weight_name):
             
         save_folder = f'/home/ccl/rain_chart/03output/{exp_name}/'
         Path(save_folder).mkdir(parents=True, exist_ok=True)
-        np.save(f'{save_folder}/{sub_exp_name}_{weight_name}_whole.npy', pred_set)
+        np.save(f'{save_folder}/{sub_exp_name}.npy', pred_set)
         print('Save predict file:', exp_name, sub_exp_name)
 
 

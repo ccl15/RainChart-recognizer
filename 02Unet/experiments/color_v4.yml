@@ -1,0 +1,30 @@
+experiment_name: Unet_color_v3
+
+template:
+  sub_exp_name: dx80_pU1pass_em4
+  model: Unet_1
+  load_path: saved_models/Unet_color_v3/U1_pass/M
+  data:
+    data_file: ../01data_process/color_f32_m10.tfr
+    shuffle_buffer: 20000
+    batch_size: 50
+  train_setting:
+    evaluate_freq: 5
+    max_epoch: 200
+    loss_name: MSE
+    L_rate: 1e-4
+    overfit_stop: 50
+
+sub_experiments:
+- sub_exp_name: dx80_pU1pass_em4_pass
+  load_path: saved_models/Unet_color_v3/dx80_pU1pass_em4/M
+  train_setting:
+    max_epoch: 400
+    L_rate: 1e-5
+
+- sub_exp_name: dx80_pU1pass_em4pem6
+  load_path: saved_models/Unet_color_v3/dx80_pU1pass_em4/M
+  train_setting:
+    max_epoch: 400
+    L_rate: 1e-6
+

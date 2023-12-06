@@ -39,7 +39,7 @@ if __name__ == '__main__':
     # fig setting. modeify here!
     input_dir = Path('/NAS-DS1515P/users1/RAINFALL_STRIP_CHARTS/Train_Label/uuchen/test')
     input_imgs = input_dir.glob('*.jpg')
-    Output_dir = Path('./output')
+    output_dir = Path('./output')
     Path(Output_dir).mkdir(parents=True, exist_ok=True)
     
     
@@ -48,6 +48,6 @@ if __name__ == '__main__':
         image = input_data_processing(img_path, color)
         pred = np.squeeze(model.predict(image))
         
-        out_path = Output_dir / (img_path.stem + '.npy')
+        out_path = output_dir / (img_path.stem + '.npy')
         np.save(out_path, pred)
         break
