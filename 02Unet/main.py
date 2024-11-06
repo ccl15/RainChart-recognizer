@@ -23,8 +23,6 @@ def main(exp_path, GPU_limit, omit_completed):
             print('Sub-experiment already done before, skipped ~~~~')
             continue
         
-        # reset tensorflow 
-
         # log and model saved path setting
         summary_writer = get_summary_writer(log_path)
         model_save_path = get_model_save_path(exp_name, sub_exp_name)

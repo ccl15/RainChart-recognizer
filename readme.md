@@ -13,14 +13,13 @@ pipenv install
 ```
 
 ## Data process
-Create data files
 1. Go to **01data_process**.
 2. modify data path at fig2dat.py
 ```bash
 pipenv run python fig2dat.py
 ```
 
-## Training
+## Training model
 1. Go to **02Unet**. Run this command:
 ```
 pipenv run python main.py <experiment_path> -G <GPU_number>
@@ -39,4 +38,4 @@ vi output_analysis.py
 ```
 
 ## Use recongnizer
-Sample code of useing recongnizer **04run_pred/predict.py**.
+Sample code of useing recongnizer : **04run_pred/predict.py**.
